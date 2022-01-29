@@ -58,7 +58,7 @@ class CustomDataset(Dataset):
         # image
         image_path = f'{file}/{file_name}.jpg'
         img = cv2.imread(image_path)
-        img = cv2.resize(img, dsize=(sys.argv[7], sys.argv[8]), interpolation=cv2.INTER_AREA)
+        img = cv2.resize(img, dsize=(int(sys.argv[7]), int(sys.argv[8])), interpolation=cv2.INTER_AREA)
         img = img.astype(np.float32)/255
         img = np.transpose(img, (2,0,1))
         
