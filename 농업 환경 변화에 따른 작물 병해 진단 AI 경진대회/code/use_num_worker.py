@@ -385,7 +385,7 @@ def run():
 
     submission = pd.read_csv('data/sample_submission.csv')
     submission['label'] = preds
-    submission.to_csv('baseline_submission.csv', index=False)
+    submission.to_csv(f'Epoch {model_number}.csv', index=False)
 
 
 if __name__ == '__main__':
