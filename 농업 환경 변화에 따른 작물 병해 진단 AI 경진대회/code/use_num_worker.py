@@ -17,6 +17,7 @@ from torchvision import models
 from torch.utils.data import Dataset
 from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
+import timm
 
 class CustomDataset(Dataset):
     def __init__(self, files, csv_feature_dict, label_encoder, labels=None, mode='train'):
@@ -83,16 +84,28 @@ class CustomDataset(Dataset):
                 'csv_feature' : torch.tensor(csv_feature, dtype=torch.float32)
             }
 
+# class CNN_Encoder(nn.Module):
+#     def __init__(self, class_n, rate=0.1):
+#         super(CNN_Encoder, self).__init__()
+#         self.model = models.resnet50(pretrained=True)
+    
+#     def forward(self, inputs):
+#         output = self.model(inputs)
+#         return output
+
 class CNN_Encoder(nn.Module):
     def __init__(self, class_n, rate=0.1):
         super(CNN_Encoder, self).__init__()
         self.model = models.resnet50(pretrained=True)
+        # self.model = timm.create_model('tf_efficientnet_b6_ns', pretrained=True)#, num_classes=class_n)
+        # self.model = timm.create_model('regnetx_006', pretrained=True)
+        # self.model = timm.create_model('swin_base_patch4_window7_224', pretrained=True)
+        self.model = self.model.float()
+
     
     def forward(self, inputs):
         output = self.model(inputs)
         return output
-
-
 
 class RNN_Decoder(nn.Module):
     def __init__(self, max_len, embedding_dim, num_features, class_n, rate):
@@ -206,7 +219,7 @@ def run():
     dropout_rate = float(sys.argv[4])
     epochs = int(sys.argv[5])
     momentums = float(sys.argv[6])
-    save_path = str(sys.argv[9])
+    # save_path = str(sys.argv[9])
 
 
     device = torch.device("cuda:0")
@@ -237,7 +250,7 @@ def run():
 
 
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-
+    # optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate)
     # optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentums)
     # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5, eta_min=0.0000000001)
 
@@ -308,8 +321,10 @@ def run():
         val_loss_plot.append(total_val_loss/(batch+1))
         val_metric_plot.append(total_val_acc/(batch+1))
         
-        if np.max(val_metric_plot) == val_metric_plot[-1]:
-            torch.save(model.state_dict(), save_path)
+        torch.save(model.state_dict(), f'Epoch {epoch + 1}.pt')
+
+        # if np.max(val_metric_plot) == val_metric_plot[-1]:
+        #     torch.save(model.state_dict(), save_path)
 
 
 
@@ -358,9 +373,9 @@ def run():
             output = torch.tensor(torch.argmax(output, dim=1), dtype=torch.int32).cpu().numpy()
             results.extend(output)
         return results
-
+    model_number = input("model number : ")
     model = CNN2RNN(max_len=max_len, embedding_dim=embedding_dim, num_features=num_features, class_n=class_n, rate=dropout_rate)
-    model.load_state_dict(torch.load(save_path, map_location=device))
+    model.load_state_dict(torch.load(f'Epoch {model_number}.pt', map_location=device))
     model.to(device)
 
     preds = predict(test_dataloader)
