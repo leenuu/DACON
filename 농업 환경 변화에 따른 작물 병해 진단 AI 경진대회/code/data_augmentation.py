@@ -78,8 +78,8 @@ class CustomDataset(Dataset):
             torchvision.transforms.RandomHorizontalFlip(p = 1),
             torchvision.transforms.RandomVerticalFlip(p = 1),
             torchvision.transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.2),
-            torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
         ])
         
         # img = cv2.resize(img, dsize=(int(sys.argv[7]), int(sys.argv[8])), interpolation=cv2.INTER_AREA)
